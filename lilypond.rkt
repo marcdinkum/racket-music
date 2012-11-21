@@ -1,6 +1,28 @@
-;;
-;; Class and convenience functions for writing Lilypond files
-;;
+;********************************************************************
+;       (c) Copyright 2012, Hogeschool voor de Kunsten Utrecht
+;                       Hilversum, the Netherlands
+;********************************************************************
+;
+; File name	: lilypond.rkt
+; System name	: SCEME: Scheme Music Composition Environment
+;
+; Description   : Racket Scheme class for creating Lilypond files
+;
+; Authors       : Marc Groenewegen, Daan van Hasselt
+; E-mail        : marc.groenewegen@kmt.hku.nl, daan.vanhasselt@kmt.hku.nl
+;
+;*********************************************************************
+;
+; Class and convenience functions for writing Lilypond files
+;
+; Exports procedures:
+;  (make-lilypond-file filename title composer key keytype notes)
+;
+; Example:
+;  at end of file
+;
+;*********************************************************************
+
 #lang racket
 
 (provide make-lilypond-file)
@@ -120,3 +142,8 @@
      (send generator lilyscore key keytype notes)
      (send generator closeFile)))
  
+;; Example
+; (define notes '(serial (note 60 4) (note 65 4) (nap 1) (parallel (note 60 4) (note 65 4))))
+;
+; (make-lilypond-file "test.ly" "Just a song" "Somebody" "c" "major" notes)
+
