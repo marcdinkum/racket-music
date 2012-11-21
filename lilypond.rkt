@@ -60,15 +60,17 @@
   (define/private (number-to-octave number)
     (- (floor (/ number 12)) 4))
 
-  (define/private (number-to-quotes number)
-    (define (generate-symbol number)
-      (if (> number 0) "'" ","))
-  
-    (define (move-number-to-0 number)
-      (if (> number 0) (- number 1) (+ number 1)))
-  
-    (if (= number 0) ""
-        (string-append (generate-symbol number) (number-to-quotes (move-number-to-0 number)))))
+
+  ;; Lilypond uses single quote and comma to raise or lower a note's pitch by
+  ;;  one octave
+  ;; (number-to-quotes) takes a number and returns a string
+  ;;  number==0 --> empty string
+  ;;  number>0 --> string containing <number> quotes
+  ;;  number<0 --> string containing <number> commas
+  (define (number-to-quotes number)
+    (cond ((= number 0) "")
+          ((> number 0) (string-append "'" (number-to-quotes (- number 1))))
+          ((< number 0) (string-append "," (number-to-quotes (+ number 1))))))
 
   ; display a single note
   (define/private (display-note note)
