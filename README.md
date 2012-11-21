@@ -4,7 +4,8 @@ http://www.lilypond.org/
 
 http://www.racket-lang.org/
 
-====== Lilypond-functionaliteit ======
+Lilypond-functionaliteit
+=======================
 
 [20 november 2012]
 Deze module is in ontwikkeling en kan nog veranderen.
@@ -20,6 +21,7 @@ naar input voor Lilypond. Deze composities voldoen aan het volgende:
 Zie verder het voorbeeld onderaan.
 
 Voorbereiding:
+
 	1. Download lilypond.rkt van de github pagina
 	https://raw.github.com/daanvanhasselt/racket_lilypond/master/lilypond.rkt
 
