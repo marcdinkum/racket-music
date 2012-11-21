@@ -61,10 +61,14 @@
     (- (floor (/ number 12)) 4))
 
   (define/private (number-to-quotes number)
-    (define (quotes-helper number output)
-     (if (<= number 0) output
-       (quotes-helper (- number 1) (string-append output "'"))))
-    (quotes-helper number ""))
+    (define (generate-symbol number)
+      (if (> number 0) "'" ","))
+  
+    (define (move-number-to-0 number)
+      (if (> number 0) (- number 1) (+ number 1)))
+  
+    (if (= number 0) ""
+        (string-append (generate-symbol number) (number-to-quotes (move-number-to-0 number)))))
 
   ; display a single note
   (define/private (display-note note)
