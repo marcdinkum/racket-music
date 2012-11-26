@@ -31,6 +31,12 @@
 
 #lang racket
 
+(provide make-phrase)
+(provide transpose)
+(provide change-tempo)
+(provide merge-phrases)
+(provide repeat-phrase)
+
 
 ;; combine melody and rhythm into a serial phrase according to our own format
 (define (make-phrase melody rhythm)
