@@ -73,7 +73,7 @@
 (define (change-note-tempo note factor)
   (if (symbol? note) note
     (cond ((equal? (car note) 'note) (list (car note) (cadr note) (* (caddr note) factor)))
-          ((equal? (car note) 'nap) (list (car note) (/ (cadr note) factor))))))
+          ((equal? (car note) 'nap) (list (car note) (* (cadr note) factor))))))
 
 ;; change the tempo of a phrase
 ;; 
