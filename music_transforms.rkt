@@ -90,6 +90,22 @@
   (append phrase1 (cdr phrase2)))
 
 
+
+; merge a list of phrases into a singe phrase
+; a phrase start with keyword 'melody' or 'serial'
+; flatten-phraselist is a helper function for merge-phraselist
+; merge-phraselist accepts 1 argument, 'lst' which should be a list of phrases
+;
+(define (flatten-phraselist lst)
+  (if (null? lst) ;; if 'lst' is empty
+      '(serial) ;; then return a list with an element 'serial', else:
+      (append (flatten-phraselist (cdr lst)) (cdr (car lst))))) ;; append flattened version of the rest of lst with the notes of this particular phrase
+
+(define (merge-phraselist lst)
+  (flatten-phraselist (reverse lst))) ; call flatten-phraselist with the reversed list
+
+
+
 ; Repeat a phrase a number of times
 ; Use merge-phrases recursively using a helper function
 ; If given number of repeats <= 1, the original phrase is returned
@@ -130,6 +146,10 @@
        (if (empty? note-func)
            lst
            (note-func lst)))))
+
+
+; merge (flatten) a list of phrases (with some help of flatten-phraselist)
+; merge-phraselist accepts 1 argument 'lst' -> a list of phrases (serial format)
 
   
 ;(define notes '(serial (note 0 4) (note 2 8) (note 4 8) (note 6 8)))
