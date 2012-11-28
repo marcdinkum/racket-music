@@ -101,6 +101,56 @@
    (repeat-phrase-helper phrase repeats))
 
 
+
+; apply transformation functions to a list of notes
+; this function takes a number of arguments:
+; - lst  the list of notes to transform
+; - parallel-func  the function to be applied to every parallel block
+; - serial-func  the function to be applied to every serial block
+; - note-func  the function to be applied to every note (or nap)
+
+  (define (apply-transform lst parallel-func serial-func note-func)
+    ; the first element of the item we're parsing is always a keyword
+    (define keyword (car lst))
+    (cond 
+      ; if the keyword is a list (so not a keyword) parse all the items in the current list
+      ((list? keyword)
+      (if (> (length lst) 1)
+       (cons (apply-transform keyword parallel-func serial-func note-func) (apply-transform (cdr lst) parallel-func serial-func note-func))
+       (apply-transform keyword parallel-func serial-func note-func)
+       ))
+      
+      ((equal? keyword 'serial) ; the start of a serial block
+       (unless (empty? serial-func)
+           (serial-func lst))
+       (cons keyword (apply-transform (cdr lst) parallel-func serial-func note-func)))
+
+      ((equal? keyword 'parallel) ; the start of a parallel block
+       (for ((i (cdr lst))); apply transforms to all the items within the parallel block
+         (apply-transform i parallel-func serial-func note-func)); apply transform
+       (unless (empty? parallel-func)
+           (parallel-func lst))
+       (cons keyword (apply-transform (cdr lst) parallel-func serial-func note-func)))
+      
+      ((or (equal? keyword 'note) (equal? keyword 'nap)) ; note or nap
+       (if (empty? note-func)
+           lst
+           (note-func lst)))))
+
+
+;(define notes '(serial (serial (note 60 4) (note 65 8) (serial (note 67 4) (note 68 8)))))
+(define notes '(serial (note 67 4) (note 68 8) (note 69 8) (note 70 8)))
+
+;(apply-transform notes 
+;                 (lambda (lst) (display "parallel: ")(display lst)(newline)) 
+;                 (lambda (lst) (display "serial: ")(display lst)(newline)) 
+;                 (lambda (lst) (display "note: ")(display lst)(newline)))
+
+(apply-transform notes 
+                 '()
+                 '()
+                 (lambda (lst) (list (car lst) (+ (cadr lst) 3) (caddr lst))))
+  
 ;; examples
 ;(define melodie '(9 7 5 4 7 nap 9 5))
 ;(define ritme '(16 16 16 16 16 16 16 16 16))
