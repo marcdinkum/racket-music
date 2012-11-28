@@ -20,6 +20,7 @@
 ;  (transpose phrase offset)
 ;  (change-tempo lst factor)
 ;  (merge-phrases phrase1 phrase2)
+;  (merge-phraselist lst)
 ;  (repeat-phrase phrase repeats)
 ;
 ; Desired functions:
@@ -35,6 +36,7 @@
 (provide transpose)
 (provide change-tempo)
 (provide merge-phrases)
+(provide merge-phraselist)
 (provide repeat-phrase)
 
 
