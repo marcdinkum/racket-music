@@ -110,46 +110,69 @@
 ; - note-func  the function to be applied to every note (or nap)
 
   (define (apply-transform lst parallel-func serial-func note-func)
-    ; the first element of the item we're parsing is always a keyword
-    (define keyword (car lst))
     (cond 
       ; if the keyword is a list (so not a keyword) parse all the items in the current list
-      ((list? keyword)
-      (if (> (length lst) 1)
-       (cons (apply-transform keyword parallel-func serial-func note-func) (apply-transform (cdr lst) parallel-func serial-func note-func))
-       (apply-transform keyword parallel-func serial-func note-func)
-       ))
+      ; do this using a for loop
+      ((list? (car lst))
+       (for/list ((i lst))
+         (apply-transform i parallel-func serial-func note-func)))
       
-      ((equal? keyword 'serial) ; the start of a serial block
-       (unless (empty? serial-func)
-           (serial-func lst))
-       (cons keyword (apply-transform (cdr lst) parallel-func serial-func note-func)))
+      ; if this is a serial block, return '(serial . the transformed rest of the list)
+      ((equal? (car lst) 'serial)
+           (cons (car lst) (apply-transform (if (empty? serial-func) (cdr lst) (serial-func (cdr lst))) parallel-func serial-func note-func)))
 
-      ((equal? keyword 'parallel) ; the start of a parallel block
-       (for ((i (cdr lst))); apply transforms to all the items within the parallel block
-         (apply-transform i parallel-func serial-func note-func)); apply transform
-       (unless (empty? parallel-func)
-           (parallel-func lst))
-       (cons keyword (apply-transform (cdr lst) parallel-func serial-func note-func)))
+      ; if this is a parallel block, return '(parallel . the transformed rest of the list)
+      ((equal? (car lst) 'parallel)
+       (cons (car lst) (apply-transform (if (empty? parallel-func) (cdr lst) (parallel-func (cdr lst))) parallel-func serial-func note-func)))
       
-      ((or (equal? keyword 'note) (equal? keyword 'nap)) ; note or nap
+      ; if this is a note or a nap, return the note (transform if needed)
+      ((or (equal? (car lst) 'note) (equal? (car lst) 'nap))
        (if (empty? note-func)
            lst
            (note-func lst)))))
 
+  
+;(define notes '(serial (note 0 4) (note 2 8) (note 4 8) (note 6 8)))
 
-;(define notes '(serial (serial (note 60 4) (note 65 8) (serial (note 67 4) (note 68 8)))))
-(define notes '(serial (note 67 4) (note 68 8) (note 69 8) (note 70 8)))
-
+; transpose using note scope function
 ;(apply-transform notes 
-;                 (lambda (lst) (display "parallel: ")(display lst)(newline)) 
-;                 (lambda (lst) (display "serial: ")(display lst)(newline)) 
-;                 (lambda (lst) (display "note: ")(display lst)(newline)))
+;                 '()
+;                 '()
+;                 (lambda (lst) (list (car lst) (+ (cadr lst) 10) (caddr lst))))
 
-(apply-transform notes 
-                 '()
-                 '()
-                 (lambda (lst) (list (car lst) (+ (cadr lst) 3) (caddr lst))))
+; reverse using serial scope function
+;(apply-transform notes 
+;                 '()
+;                 (lambda (lst) (reverse lst))
+;                 '())
+
+; change interval using parallel function
+;(define notes '(parallel (note 0 4) (note 5 4)))
+
+;(apply-transform notes
+;                 (lambda (lst) (list 
+;                                (list (car (car lst)) (- (cadr (car lst)) 1) (caddr (car lst))) 
+;                                (list (car (cadr lst)) (+ (cadr (cadr lst)) 1) (caddr (cadr lst)))))
+;                 '()
+;                 '())
+
+  
+; change interval using note scope function in parallel scope function
+;(define notes '(parallel (serial (note 0 4) (note 3 4)) (serial (note 5 4) (note 7 4))))
+
+;(apply-transform notes
+;                 (lambda (lst) (list 
+;                                (apply-transform (car lst)
+;                                                 '()
+;                                                 '()
+;                                                 (lambda (lst) (transpose-note lst -3)))
+;                                (apply-transform (cadr lst)
+;                                                 '()
+;                                                 '()
+;                                                 (lambda (lst) (transpose-note lst 3)))))
+;                 '()
+;                 '())
+  
   
 ;; examples
 ;(define melodie '(9 7 5 4 7 nap 9 5))
