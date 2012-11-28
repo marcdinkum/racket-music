@@ -54,6 +54,7 @@
 {
   \\new Staff
   {
+    \\tempo 4=120
     \\key ~a \\~a
     \\clef treble\n" key keytype)
 ;; temporary
