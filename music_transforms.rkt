@@ -101,6 +101,9 @@
       '(serial) ;; then return a list with an element 'serial', else:
       (append (flatten-phraselist (cdr lst)) (cdr (car lst))))) ;; append flattened version of the rest of lst with the notes of this particular phrase
 
+; merge (flatten) a list of phrases (with some help of flatten-phraselist)
+; merge-phraselist accepts 1 argument 'lst' -> a list of phrases (first element of each list should be 'serial' or 'melody')
+;
 (define (merge-phraselist lst)
   (flatten-phraselist (reverse lst))) ; call flatten-phraselist with the reversed list
 
@@ -146,10 +149,6 @@
        (if (empty? note-func)
            lst
            (note-func lst)))))
-
-
-; merge (flatten) a list of phrases (with some help of flatten-phraselist)
-; merge-phraselist accepts 1 argument 'lst' -> a list of phrases (serial format)
 
   
 ;(define notes '(serial (note 0 4) (note 2 8) (note 4 8) (note 6 8)))
