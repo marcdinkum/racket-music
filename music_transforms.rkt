@@ -22,9 +22,10 @@
 ;  (merge-phrases phrase1 phrase2)
 ;  (merge-phraselist lst)
 ;  (repeat-phrase phrase repeats)
+;  (reverse-phrase phrase)
 ;
 ; Desired functions:
-;  reverse, modulo12, erode, dilate, filter
+;  modulo12, erode, dilate, filter
 ;
 ; Examples: at end of file
 ;
@@ -38,6 +39,7 @@
 (provide merge-phrases)
 (provide merge-phraselist)
 (provide repeat-phrase)
+(provide reverse-phrase)
 
 
 ;; combine melody and rhythm into a serial phrase according to our own format
@@ -120,6 +122,17 @@
     (if (<= currentRepeats 1) currentPhrase
       (repeat-phrase-helper (merge-phrases phrase currentPhrase) (- currentRepeats 1))))
    (repeat-phrase-helper phrase repeats))
+
+
+
+; Reverse a phrase
+;
+(define (reverse-phrase phrase)
+  (if (null? phrase)
+      '()
+      (if (equal? (car phrase) 'serial) ; currently only works with 'serial'
+          (append '(serial) (reverse-phrase (cdr phrase)))
+          (append (reverse-phrase (cdr phrase)) (list (car phrase))))))
 
 
 
