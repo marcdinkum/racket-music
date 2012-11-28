@@ -17,7 +17,7 @@
 ;
 ; Exports procedures:
 ;  (make-phrase melody rhythm) - combine melody and rhythm into a phrase
-;  (transpose phrase)
+;  (transpose phrase offset)
 ;  (change-tempo lst factor)
 ;  (merge-phrases phrase1 phrase2)
 ;  (repeat-phrase phrase repeats)
