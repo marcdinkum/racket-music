@@ -214,5 +214,13 @@
 ;(define notes (make-phrase melodie ritme))
 ;(define trpnotes (transpose notes 60))
 ;(define slownotes (change-tempo trpnotes 1/2))
-
+  
+; merge trpnotes & slownotes to 1 phrase (and store it into variable bigphrase)
+;(define bigphrase (merge-phrases trpnotes slownotes))
+  
+; reverse bigphrase (and store it into variable bigphrase-rev)
+;(define bigphrase-rev (reverse-phrase bigphrase))
+  
+; merge a list of phrases (and store it into variable bigphrase2)
+; (define bigphrase2 (merge-phraselist (list trpnotes slownotes bigphrase-rev slownotes bigphrase)))
 
