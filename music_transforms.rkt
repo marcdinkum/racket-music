@@ -18,8 +18,10 @@
 ; Exports procedures:
 ;  (make-phrase melody rhythm) - combine melody and rhythm into a phrase
 ;  (transpose phrase offset)
-;  (change-tempo lst factor)
-;  (merge-phrases phrase1 phrase2)
+;  (change-tempo lst factor) -- deprecated. Use scale-length instead
+;  (scale-length lst factor)
+;  (merge-phrases phrase1 phrase2 ....)
+;  (merge-phraselist (phrase1 phrase2 ....))
 ;  (repeat-phrase phrase repeats)
 ;
 ; Desired functions:
@@ -34,11 +36,20 @@
 (provide make-phrase)
 (provide transpose)
 (provide change-tempo)
+(provide scale-length)
 (provide merge-phrases)
+(provide merge-phraselist)
 (provide repeat-phrase)
 
 
-;; combine melody and rhythm into a serial phrase according to our own format
+; Combine melody and rhythm into a serial phrase according to our own format.
+;
+; A pitch identifier that is not a number is regarded as a nap.
+;
+; We don't want to support other notation like c, dis, bes here because
+;  that would be interpreted as an absolute notation, which e.g. leads to
+;  problems while transposing
+; Well... maybe later if we fully understand the consequences :-)
 (define (make-phrase melody rhythm)
   (cons 'serial
    (for/list ((note-pitch melody) (note-length rhythm))
@@ -67,46 +78,44 @@
 
 
 
-;; change the tempo of a note
-;; first find out if note is a symbol like 'serial or 'parallel, in that case return unchanged
-;;  else change its tempo value and leave the rest unchanged
-(define (change-note-tempo note factor)
+;; Scale the length of a note by a factor.
+;; First find out if note is a symbol like 'serial or 'parallel, in that case return unchanged
+;;  else change its length value and leave the rest unchanged
+(define (scale-note-length note factor)
   (if (symbol? note) note
     (cond ((equal? (car note) 'note) (list (car note) (cadr note) (* (caddr note) factor)))
           ((equal? (car note) 'nap) (list (car note) (* (cadr note) factor))))))
 
-;; change the tempo of a phrase
+;; Scale the lengths of all notes and rests in a phrase
 ;; 
-(define (change-tempo lst factor)
+(define (scale-length lst factor)
  (if (empty? lst) '()
-    (cons (change-note-tempo (car lst) factor) (change-tempo (cdr lst) factor))))
+    (cons (scale-note-length (car lst) factor) (scale-length (cdr lst) factor))))
+
+
+; for the time being provide the old function for backwards compatibility
+(define change-tempo scale-length)
 
 
 
-; merge two phrases into a single phrase
-; a phrase starts with the keyword 'melody' or 'serial'
+; Merge two or more serial phrases into a single phrase.
+;  merge-phrases takes a variable number of phrases as arguments
+;  merge-phraselist takes a list of phrases in a single argument
 ;
-(define (merge-phrases phrase1 phrase2)
-  (append phrase1 (cdr phrase2)))
-
-
-
-; merge a list of phrases into a singe phrase
-; a phrase start with keyword 'melody' or 'serial'
-; flatten-phraselist is a helper function for merge-phraselist
-; merge-phraselist accepts 1 argument, 'lst' which should be a list of phrases
+; Every phrase must start with the keyword 'melody' or 'serial'
+;
+; Explanation:
+; flatten-phraselist is a helper function that strips the 'serial keyword
+;  off every phrase
 ;
 (define (flatten-phraselist lst)
-  (if (null? lst) ;; if 'lst' is empty
-      '(serial) ;; then return a list with an element 'serial', else:
-      (append (flatten-phraselist (cdr lst)) (cdr (car lst))))) ;; append flattened version of the rest of lst with the notes of this particular phrase
+  (if (empty? lst) '()
+     (append (cdr (car lst)) (flatten-phraselist (cdr lst)))))
 
-; merge (flatten) a list of phrases (with some help of flatten-phraselist)
-; merge-phraselist accepts 1 argument 'lst' -> a list of phrases (first element of each list should be 'serial' or 'melody')
-;
 (define (merge-phraselist lst)
-  (flatten-phraselist (reverse lst))) ; call flatten-phraselist with the reversed list
+  (cons 'serial (flatten-phraselist lst)))
 
+(define merge-phrases (lambda lst (merge-phraselist lst)))
 
 
 ; Repeat a phrase a number of times
@@ -197,7 +206,5 @@
 ;(define melodie '(9 7 5 4 7 nap 9 5))
 ;(define ritme '(16 16 16 16 16 16 16 16 16))
 ;(define notes (make-phrase melodie ritme))
-;(define trpnotes (transpose notes 60))
-;(define slownotes (change-tempo trpnotes 1/2))
-
+;(define compositie (merge-phrases notes (transpose notes 3) (scale-length notes 2)))
 
