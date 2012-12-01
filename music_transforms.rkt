@@ -23,9 +23,10 @@
 ;  (merge-phrases phrase1 phrase2 ....)
 ;  (merge-phraselist (phrase1 phrase2 ....))
 ;  (repeat-phrase phrase repeats)
+;  (reverse-phrase phrase)
 ;
 ; Desired functions:
-;  reverse, modulo12, erode, dilate, filter
+;  modulo12, erode, dilate, filter
 ;
 ; Examples: at end of file
 ;
@@ -40,6 +41,7 @@
 (provide merge-phrases)
 (provide merge-phraselist)
 (provide repeat-phrase)
+(provide reverse-phrase)
 
 
 ; Combine melody and rhythm into a serial phrase according to our own format.
@@ -130,6 +132,17 @@
 
 
 
+; Reverse a phrase
+;
+(define (reverse-phrase phrase)
+  (if (null? phrase)
+      '()
+      (if (equal? (car phrase) 'serial) ; currently only works with 'serial'
+          (append '(serial) (reverse-phrase (cdr phrase)))
+          (append (reverse-phrase (cdr phrase)) (list (car phrase))))))
+
+
+
 ; apply transformation functions to a list of notes
 ; this function takes a number of arguments:
 ; - lst  the list of notes to transform
@@ -207,4 +220,16 @@
 ;(define ritme '(16 16 16 16 16 16 16 16 16))
 ;(define notes (make-phrase melodie ritme))
 ;(define compositie (merge-phrases notes (transpose notes 3) (scale-length notes 2)))
+
+;(define trpnotes (transpose notes 60))
+;(define slownotes (change-tempo trpnotes 1/2))
+  
+; merge trpnotes & slownotes to 1 phrase (and store it into variable bigphrase)
+;(define bigphrase (merge-phrases trpnotes slownotes))
+  
+; reverse bigphrase (and store it into variable bigphrase-rev)
+;(define bigphrase-rev (reverse-phrase bigphrase))
+  
+; merge a list of phrases (and store it into variable bigphrase2)
+; (define bigphrase2 (merge-phraselist (list trpnotes slownotes bigphrase-rev slownotes bigphrase)))
 
