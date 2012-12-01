@@ -222,7 +222,7 @@
 ;(define compositie (merge-phrases notes (transpose notes 3) (scale-length notes 2)))
 
 ;(define trpnotes (transpose notes 60))
-;(define slownotes (change-tempo trpnotes 1/2))
+;(define slownotes (scale-length trpnotes 1/2))
   
 ; merge trpnotes & slownotes to 1 phrase (and store it into variable bigphrase)
 ;(define bigphrase (merge-phrases trpnotes slownotes))
