@@ -31,12 +31,15 @@
  (class object%
 
   (define fileport 0)
+  (define tempo 120)
 
   (super-new)
 
   (define/public (openFile filename)
    (set! fileport (open-output-file filename #:exists 'replace)))
- 
+
+  (define/public (set-tempo newtempo)
+   (set! tempo newtempo))
 
   (define/public (lilyheader title composer)
    (fprintf fileport
@@ -54,9 +57,9 @@
 {
   \\new Staff
   {
-    \\tempo 4=120
+    \\tempo 4=~a
     \\key ~a \\~a
-    \\clef treble\n" key keytype)
+    \\clef treble\n" tempo (string-downcase key) keytype)
 ;; temporary
 ;;(fprintf fileport "\\relative c'")
  (parse notes) 
@@ -78,6 +81,7 @@
   (define/private (number-to-note number)
     (define noteNames '(c cis d dis e f fis g gis a ais b))
     (list-ref noteNames (modulo number 12)))
+
 
   ;; relative to lilypond's middle C !!
   (define/private (number-to-octave number)
@@ -142,7 +146,8 @@
      (send generator lilyheader title composer)
      (send generator lilyscore key keytype notes)
      (send generator closeFile)))
- 
+
+
 ;; Example
 ; (define notes '(serial (note 60 4) (note 65 4) (nap 1) (parallel (note 60 4) (note 65 4))))
 ;

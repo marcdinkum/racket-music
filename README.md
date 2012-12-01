@@ -1,4 +1,5 @@
-This is a handy class for generating Lilypond outfrom from Racket.
+This is a collection of functions for music data manipulation and
+generating Lilypond files from Racket.
 
 http://www.lilypond.org/
 
@@ -7,7 +8,7 @@ http://www.racket-lang.org/
 Lilypond-functionaliteit
 =======================
 
-[20 november 2012]
+[1 december 2012]
 Deze module is in ontwikkeling en kan nog veranderen.
 
 Met de Lilypond module voor Racket kun je composities in Racket vertalen
