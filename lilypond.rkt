@@ -32,6 +32,31 @@
 
   (define fileport 0)
   (define tempo 120)
+  (define key "c")
+  (define keytype "major")
+  (define keynumber 0)
+
+  (define scales (list ; temporary measure
+  '(c cis d dis e f fis g gis a ais b)
+  '(bis cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)
+  '(bis cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)
+  '(bis cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)
+  '(bis cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)))
+
+   (define grondtonen (vector "c" "cis" "des" "d" "dis" "es" "e" "f" "fis"
+                           "ges" "g" "gis" "as" "a" "ais" "bes" "b"))
 
   (super-new)
 
@@ -50,8 +75,11 @@
 }\n\n" "2.10.5" title composer))
 
 
-  (define/public (lilyscore key keytype notes)
+  (define/public (lilyscore newkey newkeytype notes)
    (begin
+    (set! key newkey)
+    (set! keytype newkeytype)
+    (set! keynumber (vector-member key grondtonen))
     (fprintf fileport
 "\\score
 {
@@ -59,7 +87,7 @@
   {
     \\tempo 4=~a
     \\key ~a \\~a
-    \\clef treble\n" tempo (string-downcase key) keytype)
+    \\clef treble\n" tempo (string-downcase newkey) newkeytype)
 ;; temporary
 ;;(fprintf fileport "\\relative c'")
  (parse notes) 
@@ -79,8 +107,8 @@
   ; * put notes in the correct octave
   ; * use modal correction
   (define/private (number-to-note number)
-    (define noteNames '(c cis d dis e f fis g gis a ais b))
-    (list-ref noteNames (modulo number 12)))
+    (list-ref (list-ref scales keynumber) (modulo number 12)))
+
 
 
   ;; relative to lilypond's middle C !!
