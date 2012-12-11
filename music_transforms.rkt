@@ -17,6 +17,8 @@
 ;
 ; Exports procedures:
 ;  (make-phrase melody rhythm) - combine melody and rhythm into a phrase
+;  (note-to-number note) - translate absolute note name to number
+;  (notes-to-numbers lst) - translate list of absolute notes name to numbers
 ;  (transpose phrase offset)
 ;  (change-tempo lst factor) -- deprecated. Use scale-length instead
 ;  (scale-length lst factor)
@@ -35,6 +37,8 @@
 #lang racket
 
 (provide make-phrase)
+(provide note-to-number)
+(provide notes-to-numbers)
 (provide transpose)
 (provide change-tempo)
 (provide scale-length)
@@ -57,6 +61,24 @@
    (for/list ((note-pitch melody) (note-length rhythm))
      (if (number? note-pitch) (list 'note note-pitch note-length)
          (list 'nap note-length)))))
+
+;;
+;; translate absolute note name to number
+;;
+(define (note-to-number note)
+ (let* ((raised-names (vector 'c 'cis 'd 'dis 'e 'f 'fis 'g 'gis 'a 'ais 'b))
+         (lowered-names (vector 'c 'des 'd 'es 'e 'f 'ges 'g 'as 'a 'bes 'b))
+         (result (vector-member note raised-names)))
+   ;; if not found in the first vector the result is #f and we'll look in
+   ;;   the second list
+   (if (not result) (vector-member note lowered-names)
+       result)))
+
+;;
+;; translate a list of absolute note names to numbers
+;;
+(define (notes-to-numbers lst)
+  (for/list ((note lst)) (note-to-number note)))
 
 
 ;; transpose a note
