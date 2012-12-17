@@ -17,6 +17,8 @@
 ;
 ; Exports procedures:
 ;  (make-phrase melody rhythm) - combine melody and rhythm into a phrase
+;  (make-parallel phrase [phrase]+ ) - combine two or more phrases into a
+;					parallel structure
 ;  (note-to-number note) - translate absolute note name to number
 ;  (notes-to-numbers lst) - translate list of absolute notes name to numbers
 ;  (transpose phrase offset)
@@ -26,6 +28,7 @@
 ;  (merge-phraselist (phrase1 phrase2 ....))
 ;  (repeat-phrase phrase repeats)
 ;  (reverse-phrase phrase)
+;  (apply-transform lst parallel-func serial-func note-func)
 ;
 ; Desired functions:
 ;  modulo12, erode, dilate, filter
@@ -37,6 +40,7 @@
 #lang racket
 
 (provide make-phrase)
+(provide make-parallel)
 (provide note-to-number)
 (provide notes-to-numbers)
 (provide transpose)
@@ -46,6 +50,7 @@
 (provide merge-phraselist)
 (provide repeat-phrase)
 (provide reverse-phrase)
+(provide apply-transform)
 
 
 ; Combine melody and rhythm into a serial phrase according to our own format.
@@ -61,6 +66,12 @@
    (for/list ((note-pitch melody) (note-length rhythm))
      (if (number? note-pitch) (list 'note note-pitch note-length)
          (list 'nap note-length)))))
+
+;;
+;; make-parallel combines two or more voices into a parallel structure
+;;
+(define make-parallel (lambda phrases (cons 'parallel phrases)))
+
 
 ;;
 ;; translate absolute note name to number
@@ -91,15 +102,9 @@
     (if (equal? (car note) 'note) (list 'note (+ (cadr note) offset) (caddr note))
       note)))
 
-
-;; Transpose a phrase
-;;
-;; This procedure uses the transpose-note procedure to assess every element and if it is
-;;  transpose-able perform the actual transpose
-(define (transpose lst offset)
-  (if (empty? lst) '()
-    (cons (transpose-note (car lst) offset) (transpose (cdr lst) offset))))
-
+; Transpose a phrase using apply-transform at note level
+(define (transpose phrase offset)
+  (apply-transform phrase '() '() (lambda (note) (transpose-note note offset))))
 
 
 ;; Scale the length of a note by a factor.
