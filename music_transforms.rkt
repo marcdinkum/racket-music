@@ -127,19 +127,22 @@
 
 
 
-; Merge two or more serial phrases into a single phrase.
+; Merge two or more phrases into a single phrase.
 ;  merge-phrases takes a variable number of phrases as arguments
 ;  merge-phraselist takes a list of phrases in a single argument
 ;
-; Every phrase must start with the keyword 'melody' or 'serial'
-;
 ; Explanation:
 ; flatten-phraselist is a helper function that strips the 'serial keyword
-;  off every phrase
+;  off every 'serial phrase
+;
+; lst is a list of phrases. Every phrase can start with 'serial or 'parallel
+; Phrases starting with 'serial but the first one should be stripped of their keyword.
+; Phrases starting with 'parallel should be inserted as-is
 ;
 (define (flatten-phraselist lst)
   (if (empty? lst) '()
-     (append (cdr (car lst)) (flatten-phraselist (cdr lst)))))
+    (if (equal? (car (car lst)) 'serial) (append (cdr (car lst)) (flatten-phraselist (cdr lst)))
+     (cons (car lst) (flatten-phraselist (cdr lst))))))
 
 (define (merge-phraselist lst)
   (cons 'serial (flatten-phraselist lst)))
