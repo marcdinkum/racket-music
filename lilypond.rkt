@@ -36,7 +36,7 @@
   (define keytype "major")
   (define keynumber 0)
 
-  (define scales (list ; temporary measure
+  (define major-scales (list
   '(c cis d dis e f fis g gis a ais b)
   '(bis cis d dis e eis fis g gis a ais b)
   '(c des d es e f ges g as a bes b)
@@ -54,6 +54,26 @@
   '(bis cis d dis e eis fis g gis a ais b)
   '(c des d es e f ges g as a bes b)
   '(c cis d dis e f fis g gis a ais b)))
+
+  (define minor-scales (list
+  '(c des d es e f ges g as a bes b)
+  '(bis cis d dis e f fis g gis a ais b)
+  '(c des d es fes f ges g as beses bes ces)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes ces)
+  '(c cis d dis e f fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)
+  '(c des eses es fes f ges g as beses bes ces)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)
+  '(c des d es fes f ges g as a bes ces)
+  '(c cis d dis e f fis g gis a ais b)
+  '(bis cis d dis e eis fis g gis a ais b)
+  '(c des d es e f ges g as a bes b)
+  '(c cis d dis e f fis g gis a ais b)))
+
 
    (define grondtonen (vector "c" "cis" "des" "d" "dis" "es" "e" "f" "fis"
                            "ges" "g" "gis" "as" "a" "ais" "bes" "b"))
@@ -103,12 +123,12 @@
   ; convert a midi note number into a note name (primitive version)
   ;
   ; should be able to:
-  ; * handle symbolic note names as well as numbers,
-  ; * put notes in the correct octave
+  ; * handle symbolic note names as well as numbers
   ; * use modal correction
   (define/private (number-to-note number)
-    (list-ref (list-ref scales keynumber) (modulo number 12)))
-
+     (if (string=? keytype "major")
+       (list-ref (list-ref major-scales keynumber) (modulo number 12))
+       (list-ref (list-ref minor-scales keynumber) (modulo number 12))))
 
 
   ;; relative to lilypond's middle C !!
