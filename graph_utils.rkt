@@ -2,12 +2,14 @@
 
 ; procedures to export
 (provide validate-graph)
+(provide remove-comment-from-line)
+(provide remove-comments-from-multiline) ; input filter
 (provide remove-junk-from-string) ;input filter
 (provide make-length-ubiquitous) ; input filter
 
-;
+; ------------------------------------------------------
 ; ---------------- graph validator ---------------------
-;
+; ------------------------------------------------------
 
 ; Find a node in a graph by matching its key.
 ; Every node starts with its key.
@@ -46,12 +48,46 @@
         (validate-subgraph (cdr a-graph))))))
   (validate-subgraph org-graph))
 
+; ---------------------------------------------------
 ; ------------------- input filter ------------------
+; ---------------------------------------------------
 ;
 ; The input filter helps to clean up a Lilypond specification of note
-; material by providing a junk remove procedure (with user-specified
-; strings to remove) and a procedure that repeats note length for notes
-; that don't have it specified
+; material by providing several procedures for a step-by-step cleanup:
+; - comment remover
+; - junk remove procedure (with user-specified  strings to remove)
+; - a procedure that repeats note length for notes that don't have it specified
+
+
+; remove-comment-from-line removes comment from a line given as a string in str.
+; The comment as indicated by comment-string is removed from str, as is the rest of the line.
+;
+; The return value is a string, which can be empty
+(define (remove-comment-from-line str comment-string)
+  (let ((splitresult (string-split str comment-string)))
+    (if (= (length splitresult) 0) ""
+      (car (string-split str comment-string)))))
+
+
+; remove-comment-from-linelist removes all single-line comments from every
+;  line in the given list of lines
+; The comment as indicated by comment-string is removed, as is the rest of that line
+;
+; The return value is a string containing one or more newline-separated
+;  lines with their comments removed
+(define (remove-comment-from-linelist lst comment-string)
+  (if (empty? lst) ""
+    (string-append (remove-comment-from-line (car lst) comment-string)
+                   (remove-comment-from-linelist (cdr lst) comment-string))))
+
+
+; remove-comments-from-multiline removes all single-line comments from a
+;  string containing one or more lines separated by newline characters.
+;
+; The return value is a string containing one or more newline-separated
+;  lines with their comments removed
+(define (remove-comments-from-multiline str comment-string)
+  (remove-comment-from-linelist (string-split str "\n") comment-string))
 
 
 ; recursively apply string-replace to the input string, every time replacing one of the junk-strings by nothing
@@ -91,4 +127,18 @@
       (cons (reconstruct-note-symbol (get-pitch-string (car lst)) current-length) (make-length-ubiquitous (cdr lst) current-length))
     ; else
       (cons (reconstruct-note-symbol (get-pitch-string (car lst)) (get-length-string (car lst))) (make-length-ubiquitous (cdr lst) (get-length-string (car lst)))))))
+
+
+; Examples of the input filter
+;
+; remove all single-line comments
+;(define no-comment (remove-comments-from-multiline original-notes "%"))
+;
+; remove all unwanted ornaments
+;(define junk-strings '("'"  ","   "."  "|"  "{"  "}"  "~"  "%"  "\n"))
+;(define filtered-input (remove-junk-from-string no-comment junk-strings))
+;
+; give every note a length value
+;(define prepared-notes (make-length-ubiquitous (string-split filtered-input) 1))
+
 
