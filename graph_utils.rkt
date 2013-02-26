@@ -15,8 +15,9 @@
 ; Every node starts with its key.
 ; If the key is found, return the entire node (i.e. car lst), else #f.
 (define (find-node key lst)
+  ;(display (format "find ~a in ~a" key lst))(newline)(newline)
   (if (empty? lst) #f ; not found
-    (if (eq? key (car (car lst))) (car lst)
+    (if (equal? key (car (car lst))) (car lst)
         (find-node key (cdr lst)))))
 
 
