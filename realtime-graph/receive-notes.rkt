@@ -133,11 +133,11 @@
     (set! currently-active-note -1))
           
   ; if this a new note-on while the other note was still playing, insert a note off
-  (when (and (not (= (cadr event) currently-active-note)) (equal? (car event) #"/noteon"))
+  (when (and (and (not (= currently-active-note -1)) (not (= (cadr event) currently-active-note))) (equal? (car event) #"/noteon"))
       (add-event (list #"/noteoff" currently-active-note (current-milliseconds))))
     
   ; if this a note-off for another note then the currently active note, ignore it
-  (unless (and (not (= (cadr event) currently-active-note)) (equal? (car event) #"/noteoff"))
+  (unless (and (and (not (= currently-active-note -1)) (not (= (cadr event) currently-active-note))) (equal? (car event) #"/noteoff"))
     (set! event-list (append event-list (list event)))))
 
 ; Detect silence in the incoming stream of events
