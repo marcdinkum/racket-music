@@ -5,6 +5,7 @@
 (provide set-silence-timeout) ; Set the minimum amount of time to detect silence, in ms
 (provide set-note-callback); Set a function that will be called with a list of notes when silence is detected
 (provide set-receive-port); Set a port to receive OSC on
+(provide set-receive-host); Set a host to receive OSC on
 
 (provide remove-item-from-list) ; Remove an item at an index from a list
 
@@ -24,7 +25,11 @@
 (define (set-receive-port new-port)
   (set! port new-port))
 
+; Set a host to receive OSC on
 (define host #f)
+(define (set-receive-host new-host)
+  (set! host new-host))
+
 (define receive-socket (udp-open-socket))
 (define receive-buffer (make-bytes 10000 0))
 (udp-bind! receive-socket host port)
