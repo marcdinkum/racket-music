@@ -52,6 +52,10 @@
 (provide reverse-phrase)
 (provide apply-transform)
 
+; dotnote is used for dotted notes which have a duration of 3/2 times the
+;  indicated integer.
+(define (dotnote n)
+  (if (flonum? n) (* 2/3 (inexact->exact n)) n))
 
 ; Combine melody and rhythm into a serial phrase according to our own format.
 ;
@@ -64,8 +68,9 @@
 (define (make-phrase melody rhythm)
   (cons 'serial
    (for/list ((note-pitch melody) (note-length rhythm))
-     (if (number? note-pitch) (list 'note note-pitch note-length)
-         (list 'nap note-length)))))
+     (if (number? note-pitch)
+         (list 'note note-pitch (dotnote note-length))
+         (list 'nap (dotnote note-length))))))
 
 ;;
 ;; make-parallel combines two or more voices into a parallel structure
