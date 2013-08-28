@@ -108,8 +108,6 @@
     \\tempo 4=~a
     \\key ~a \\~a
     \\clef treble\n" tempo (string-downcase newkey) newkeytype)
-;; temporary
-;;(fprintf fileport "\\relative c'")
  (parse notes) 
  (fprintf fileport
     "
@@ -135,6 +133,15 @@
   (define/private (number-to-octave number)
     (- (floor (/ number 12)) 4))
 
+  ; length
+  ; If length is an exact integer, leave it as is it. If not, assume the
+  ;  note is dotted, which means it is 3/2 times as long as the integer.
+  ; Since this has already been discounted we need to nullify it and add a
+  ;  dot to accord with Lilypond's notation
+  (define/private (length-encoding number)
+    (if (exact-integer? number) number
+      (format "~a." (* 3/2 number))))
+
 
   ;; Lilypond uses single quote and comma to raise or lower a note's pitch by
   ;;  one octave
@@ -152,11 +159,11 @@
     (fprintf fileport "~a~a~a "
       (number-to-note (cadr note)) ;; note name
       (number-to-quotes (number-to-octave (cadr note))) ;; quotes for octave
-      (caddr note))) ;; note length
+      (length-encoding (caddr note)))) ;; note length
 
   ; display a rest (a.k.a. nap)
   (define/private (display-nap nap)
-    (fprintf fileport "r~a " (cadr nap)))
+    (fprintf fileport "r~a " (length-encoding (cadr nap))))
 
   ; parse a composition
   (define/private (parse item)
@@ -167,7 +174,8 @@
        (fprintf fileport "{ "); the start of a serial block
        (for ((i (cdr item))); parse the rest of the items
 	     (parse i))
-       (fprintf fileport "} ")); the end of a serial block
+       (fprintf fileport "} \\\\ \n")); the end of a serial block
+       ; double backslash creates a new voice for every block
 
       ((equal? keyword 'parallel) 
        (fprintf fileport "<< "); the start of a parallel block
