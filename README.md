@@ -8,13 +8,10 @@ http://www.racket-lang.org/
 Lilypond-functionaliteit
 =======================
 
-[1 december 2012]
-Deze module is in ontwikkeling en kan nog veranderen.
-
 Met de Lilypond module voor Racket kun je composities in Racket vertalen
 naar input voor Lilypond. Deze composities voldoen aan het volgende:
 
-* Noten worden numeriek en absoluut aangegeven, waarbij 60 middle-C is. In deze versie is 48 de laagste waarde die je kunt gebruiken
+* Noten worden numeriek en absoluut aangegeven, waarbij 60 middle-C is.
 * De lengte van elke noot komt na de noot. Hierbij is 1 een hele noot, 2 een halve noot, 4 een kwartnoot etc.
 * Een rust wordt aangegeve met "nap" (dutje)
 * Een voice wordt aangegeven met "serial" en gelijktijdige elementen met "parallel"

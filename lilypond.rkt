@@ -1,5 +1,5 @@
 ;********************************************************************
-;       (c) Copyright 2012, Hogeschool voor de Kunsten Utrecht
+;       (c) Copyright 2013, Hogeschool voor de Kunsten Utrecht
 ;                       Hilversum, the Netherlands
 ;********************************************************************
 ;
@@ -15,25 +15,43 @@
 ;
 ; Class and convenience functions for writing Lilypond files
 ;
-; Exports procedures:
-;  (make-lilypond-file filename title composer key keytype notes)
-;
-; Example:
+; Examples:
 ;  at end of file
 ;
 ;*********************************************************************
 
 #lang racket
 
-(provide make-lilypond-file)
+(provide make-lilypond-file) ; kept for backwards compatibility
+(provide begin-nieuwe-lilypond-file)
+(provide lilypond-titel)
+(provide lilypond-componist)
+(provide lilypond-tempo)
+(provide lilypond-sleutel)
+(provide lilypond-schaal)
+(provide lilypond-instrument)
+(provide schrijf-lilypond-file)
+
+
+; create a lilygenerator so the user doesn't need to specify it with
+;  every function call
+(define lilygenerator #f)
+
 
 (define LilyGenerator%
  (class object%
 
+  ; define some default values
   (define fileport 0)
+  (define file_open #f)
+  (define title "Titel")
+  (define composer "Componist")
   (define tempo 120)
   (define key "c")
   (define keytype "major")
+  (define instrument-specified #f)
+  (define instrument-name "violin")
+  (define instrument "violin")
   (define keynumber 0)
 
   (define major-scales (list
@@ -75,7 +93,7 @@
   '(c cis d dis e f fis g gis a ais b)))
 
 
-   (define grondtonen (vector "c" "cis" "des" "d" "dis" "es" "e" "f" "fis"
+   (define base-notes (vector "c" "cis" "des" "d" "dis" "es" "e" "f" "fis"
                            "ges" "g" "gis" "as" "a" "ais" "bes" "b"))
 
   (super-new)
@@ -83,10 +101,28 @@
   (define/public (openFile filename)
    (set! fileport (open-output-file filename #:exists 'replace)))
 
-  (define/public (set-tempo newtempo)
-   (set! tempo newtempo))
+  (define/public (set-title newtitle)
+   (set! title newtitle))
 
-  (define/public (lilyheader title composer)
+  (define/public (set-composer new-composer)
+   (set! composer new-composer))
+
+  (define/public (set-tempo new-tempo)
+   (set! tempo new-tempo))
+
+  (define/public (set-key new-key)
+   (set! key (string-downcase new-key))
+   (set! keynumber (vector-member key base-notes)))
+
+  (define/public (set-keytype new-keytype)
+   (set! keytype new-keytype))
+
+  (define/public (set-instrument new-instrument-name new-instrument)
+   (set! instrument-name new-instrument-name)
+   (set! instrument new-instrument)
+   (set! instrument-specified #t))
+
+  (define/public (write-header)
    (fprintf fileport
 "\\version ~s
 \\header {
@@ -95,11 +131,8 @@
 }\n\n" "2.10.5" title composer))
 
 
-  (define/public (lilyscore newkey newkeytype notes)
+  (define/public (write-lily-file notes)
    (begin
-    (set! key newkey)
-    (set! keytype newkeytype)
-    (set! keynumber (vector-member key grondtonen))
     (fprintf fileport
 "\\score
 {
@@ -107,7 +140,12 @@
   {
     \\tempo 4=~a
     \\key ~a \\~a
-    \\clef treble\n" tempo (string-downcase newkey) newkeytype)
+    \\clef treble\n" tempo key keytype)
+    (when instrument-specified
+      (fprintf fileport
+        (format "\\set Staff.instrumentName = \"~a\"\n" instrument-name))
+      (fprintf fileport
+        (format "\\set Staff.midiInstrument = #\"~a\"\n" instrument)))
  (parse notes) 
  (fprintf fileport
     "
@@ -133,7 +171,6 @@
   (define/private (number-to-octave number)
     (- (floor (/ number 12)) 4))
 
-  ; length
   ; If length is an exact integer, leave it as is it. If not, assume the
   ;  note is dotted, which means it is 3/2 times as long as the integer.
   ; Since this has already been discounted we need to nullify it and add a
@@ -192,20 +229,90 @@
   (define/public (closeFile)
     (close-output-port fileport))
 
-)) ;; class
+)) ; class LilyGenerator%
 
 
+; show warning if functions are called on non-existent object
+(define (warning-no-lily-object)
+  (display "Begin eerst een nieuwe file met begin-nieuwe-lilypond-file\n"))
+
+(define (begin-nieuwe-lilypond-file filename)
+  (set! lilygenerator (new LilyGenerator%))
+  (send lilygenerator openFile filename))
+  
+(define (lilypond-titel title)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (send lilygenerator set-title title)))
+
+(define (lilypond-componist composer)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (send lilygenerator set-composer composer)))
+
+(define (lilypond-tempo tempo)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (send lilygenerator set-tempo tempo)))
+
+(define (lilypond-sleutel key)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (send lilygenerator set-key key)))
+
+(define (lilypond-schaal keytype)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (send lilygenerator set-keytype keytype)))
+
+(define (lilypond-instrument instrument-name instrument)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (send lilygenerator set-instrument instrument-name instrument)))
+
+(define (schrijf-lilypond-file notes)
+  (if (equal? lilygenerator #f)
+    (warning-no-lily-object)
+    (begin
+      (send lilygenerator write-header)
+      (send lilygenerator write-lily-file notes)
+      (send lilygenerator closeFile)
+      (set! lilygenerator #f)))) ; instruct garbage collector to destroy the object
+
+
+; for backwards compatibility: the all-in-one lilypond construction call
 (define (make-lilypond-file filename title composer key keytype notes)
-  (define generator (new LilyGenerator%))
    (begin
-     (send generator openFile filename)
-     (send generator lilyheader title composer)
-     (send generator lilyscore key keytype notes)
-     (send generator closeFile)))
+    (set! lilygenerator (new LilyGenerator%))
+    (send lilygenerator openFile filename)
+    (send lilygenerator set-title title)
+    (send lilygenerator set-composer composer)
+    (send lilygenerator set-key key)
+    (send lilygenerator set-keytype keytype)
+    (send lilygenerator write-header)
+    (send lilygenerator write-lily-file notes)
+    (send lilygenerator closeFile)
+    (set! lilygenerator #f))) ; instruct garbage collector to destroy the object
 
 
-;; Example
-; (define notes '(serial (note 60 4) (note 65 4) (nap 1) (parallel (note 60 4) (note 65 4))))
+; Examples
 ;
-; (make-lilypond-file "test.ly" "Just a song" "Somebody" "c" "major" notes)
+; (define notes '(serial
+;  (note 61 8) (note 60 8) (note 67 8) (note 69 8) (note 70 8)
+;  (note 70 8) (note 69 8) (note 70 8) (note 67 8) (note 63 8)
+;  (note 65 8) (note 67 8) (note 63 8) (note 62 8) (note 62 8)
+;  (note 60 8))
+;
+; The elaborate way: open a file, specify some props and write it
+; (begin-nieuwe-lilypond-file "example_1.ly")
+; (lilypond-titel "Een en al vrolijkheid")
+; (lilypond-componist "Marc")
+; (lilypond-tempo 78)
+; (lilypond-sleutel "g")
+; (lilypond-schaal "minor")
+; (lilypond-instrument "guitar" "acoustic guitar (nylon)")
+; (schrijf-lilypond-file notes)
+;
+; The compact way: everything in one function call
+; (make-lilypond-file "example_2.ly" "Just a song" "Somebody" "c" "major" notes)
 
